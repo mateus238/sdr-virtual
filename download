@@ -1,0 +1,9 @@
+_legacy
+data
+tests
+.git
+__pycache__
+*.pyc
+bridge/node_modules
+bridge/auth
+.env
