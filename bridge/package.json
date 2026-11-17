@@ -1,0 +1,14 @@
+{
+  "name": "sdr-wa-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Bridge NÃO OFICIAL (WhatsApp Web via Baileys) para o SDR Virtual. Uso sob risco do operador.",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.18",
+    "pino": "^9.5.0",
+    "qrcode": "^1.5.4"
+  }
+}

@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SDR Virtual</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1c2230;--mut:#667085;--line:#e4e7ec;--pri:#0b6e4f;--pri2:#e7f4ee;--warn:#b54708;--warnbg:#fffaeb;--err:#b42318;--errbg:#fef3f2;--ok:#067647;--okbg:#ecfdf3}
+@media (prefers-color-scheme:dark){:root{--bg:#12151c;--card:#1a1f29;--ink:#e8ebf1;--mut:#98a2b3;--line:#2a3140;--pri:#34c38f;--pri2:#16372c;--warn:#fdb022;--warnbg:#3a2b0a;--err:#f97066;--errbg:#3b1512;--ok:#47cd89;--okbg:#0f2e1f}}
+*{box-sizing:border-box}body{margin:0;font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+a{color:var(--pri);text-decoration:none}h1{font-size:20px;margin:0 0 14px}h2{font-size:16px;margin:0 0 10px}h3{font-size:14px;margin:14px 0 6px}
+#app{display:flex;min-height:100vh}nav{width:208px;background:var(--card);border-right:1px solid var(--line);padding:14px 10px;position:sticky;top:0;height:100vh;flex-shrink:0}
+nav .brand{font-weight:700;font-size:16px;padding:4px 10px 14px}nav a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink);margin-bottom:2px}
+nav a.on{background:var(--pri2);color:var(--pri);font-weight:600}nav .who{position:absolute;bottom:12px;left:10px;right:10px;font-size:12px;color:var(--mut)}
+main{flex:1;padding:22px 26px;max-width:1200px;min-width:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.grid{display:grid;gap:12px}.g4{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.tile .n{font-size:26px;font-weight:700}.tile .l{color:var(--mut);font-size:12px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:12px;color:var(--mut);font-weight:600}
+tr.click{cursor:pointer}tr.click:hover{background:var(--pri2)}
+input,select,textarea{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}textarea{min-height:90px;resize:vertical}
+label{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
+button{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:8px;cursor:pointer}button.pri{background:var(--pri);color:#fff;border-color:var(--pri)}button.dng{color:var(--err)}button:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.row>*{flex:0 0 auto}.sp{flex:1!important}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;background:var(--pri2);color:var(--pri);white-space:nowrap}.b-warn{background:var(--warnbg);color:var(--warn)}.b-err{background:var(--errbg);color:var(--err)}.b-ok{background:var(--okbg);color:var(--ok)}.b-gray{background:var(--line);color:var(--mut)}
+.alert{padding:10px 12px;border-radius:8px;margin:8px 0}.a-warn{background:var(--warnbg);color:var(--warn)}.a-err{background:var(--errbg);color:var(--err)}.a-ok{background:var(--okbg);color:var(--ok)}
+.mut{color:var(--mut)}.small{font-size:12px}.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px;flex-wrap:wrap}.tabs a{padding:8px 14px;color:var(--mut);border-bottom:2px solid transparent;cursor:pointer}.tabs a.on{color:var(--pri);border-color:var(--pri);font-weight:600}
+.bar{height:22px;background:var(--pri);border-radius:5px;color:#fff;font-size:12px;padding:2px 8px;white-space:nowrap;min-width:26px}
+.funnel>div{margin-bottom:6px}.funnel .lab{font-size:12px;color:var(--mut);margin-bottom:2px}
+.chart{display:flex;align-items:flex-end;gap:4px;height:110px}.chart .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:1px;height:100%}.chart i{display:block;border-radius:2px 2px 0 0}
+.chat{display:flex;flex-direction:column;gap:8px;max-height:56vh;overflow:auto;padding:4px}
+.msg{max-width:78%;padding:8px 12px;border-radius:12px;white-space:pre-wrap;word-break:break-word}.msg.in{background:var(--line);align-self:flex-start}.msg.out{background:var(--pri2);align-self:flex-end}.msg.sys{align-self:center;background:var(--warnbg);color:var(--warn);font-size:12px}
+.msg .meta{font-size:11px;color:var(--mut);margin-top:3px}
+.split{display:grid;grid-template-columns:320px 1fr;gap:14px}@media(max-width:900px){.split{grid-template-columns:1fr}nav{display:none}main{padding:14px}}
+.item{padding:10px;border-bottom:1px solid var(--line);cursor:pointer}.item:hover,.item.on{background:var(--pri2)}
+.login{max-width:360px;margin:12vh auto}pre{background:var(--bg);padding:10px;border-radius:8px;overflow:auto;font-size:12px}
+.tl{border-left:2px solid var(--line);margin-left:6px;padding-left:14px}.tl .ev{margin-bottom:10px;position:relative}.tl .ev:before{content:"";position:absolute;left:-20px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--pri)}
+.tl .ev.lead:before{background:var(--mut)}.tl .ev.handoff:before{background:var(--ok)}.tl .ev.fim:before{background:var(--err)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const $ = (s, r=document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let TOKEN = null, USER = null, LABELS = {};
+try { TOKEN = sessionStorage.getItem('tok'); USER = JSON.parse(sessionStorage.getItem('usr') || 'null'); } catch (e) {}
+
+async function api(path, opt = {}) {
+  const h = {}; if (TOKEN) h.Authorization = 'Bearer ' + TOKEN;
+  let body = opt.body;
+  if (body && !(body instanceof FormData)) { h['Content-Type'] = 'application/json'; body = JSON.stringify(body); }
+  const r = await fetch('/api' + path, {method: opt.method || (body ? 'POST' : 'GET'), headers: h, body});
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401 && TOKEN) { logout(); throw new Error('Sessão expirada'); }
+  if (!r.ok) throw new Error(j.error || ('Erro ' + r.status));
+  return j;
+}
+const notify = (msg, kind='ok') => { const d = document.createElement('div'); d.className = 'alert a-' + kind; d.style.cssText = 'position:fixed;top:14px;right:14px;z-index:9;max-width:420px;box-shadow:0 4px 18px #0003'; d.textContent = msg; document.body.appendChild(d); setTimeout(() => d.remove(), 4500); };
+const act = async (fn, okmsg) => { try { const r = await fn(); if (okmsg) notify(okmsg); return r; } catch (e) { notify(e.message, 'err'); } };
+const fmt = d => d ? new Date(d.endsWith('Z') || d.includes('+') ? d : d + 'Z').toLocaleString('pt-BR', {dateStyle:'short', timeStyle:'short'}) : '—';
+const stBadge = s => `<span class="badge ${/OPT|SEM|FORA|BLOQ|INVAL|failed|finished/.test(s) ? 'b-err' : /QUALIF|TRANSF|CONVERT|active/.test(s) ? 'b-ok' : /AGUARD|NOVO|draft|paused|ready/.test(s) ? 'b-gray' : ''}">${esc(LABELS[s] || s)}</span>`;
+const split = s => s.split('\n').map(x => x.trim()).filter(Boolean);
+
+function logout() { TOKEN = USER = null; try { sessionStorage.clear(); } catch (e) {} render(); }
+
+/* ---------------- shell ---------------- */
+const NAV = [['dashboard','Dashboard'],['campanhas','Campanhas'],['importar','Importar leads'],['conversas','Conversas'],['oportunidades','Oportunidades'],['supressao','Supressão / opt-out'],['config','Contas WhatsApp'],['auditoria','Auditoria']];
+function route() { const [p, id, tab] = location.hash.replace('#/', '').split('/'); return {p: p || 'dashboard', id, tab}; }
+window.addEventListener('hashchange', render);
+
+async function render() {
+  clearInterval(window._poll);
+  const app = $('#app');
+  if (!TOKEN) return loginView(app);
+  const r = route();
+  const rank = {sdr:1, manager:2, admin:3}[USER.role];
+  const items = NAV.filter(([k]) => rank >= 2 || ['dashboard','conversas','oportunidades'].includes(k)).filter(([k]) => k !== 'auditoria' || rank >= 3);
+  app.innerHTML = `<nav><div class="brand">🤝 SDR Virtual</div>${items.map(([k,l]) => `<a href="#/${k}" class="${r.p===k?'on':''}">${l}</a>`).join('')}
+    <div class="who">${esc(USER.name)} · ${esc(USER.role)}<br><a href="#" id="lo">Sair</a></div></nav><main id="main">Carregando…</main>`;
+  $('#lo').onclick = e => { e.preventDefault(); api('/auth/logout', {method:'POST'}).catch(()=>{}); logout(); };
+  try { LABELS = Object.fromEntries((await api('/status-labels')).map(x => [x.code, x.label])); } catch (e) {}
+  const v = {dashboard, campanhas, importar, conversas, oportunidades, supressao, config, auditoria}[r.p] || dashboard;
+  try { await v($('#main'), r); } catch (e) { $('#main').innerHTML = `<div class="alert a-err">${esc(e.message)}</div>`; }
+}
+
+function loginView(app) {
+  app.innerHTML = `<div class="card login"><h1>Entrar</h1><form id="f"><label>E-mail</label><input name="email" type="email" required autofocus>
+  <label>Senha</label><input name="password" type="password" required><p><button class="pri" style="width:100%">Entrar</button></p><div id="e"></div></form></div>`;
+  $('#f').onsubmit = async ev => { ev.preventDefault(); const d = Object.fromEntries(new FormData(ev.target));
+    try { const r = await api('/auth/login', {body: d}); TOKEN = r.token; USER = r.user; try { sessionStorage.setItem('tok', TOKEN); sessionStorage.setItem('usr', JSON.stringify(USER)); } catch (e) {} render(); }
+    catch (e) { $('#e').innerHTML = `<div class="alert a-err">${esc(e.message)}</div>`; } };
+}
+
+/* ---------------- dashboard ---------------- */
+async function dashboard(m) {
+  const cs = USER.role === 'sdr' ? [] : await api('/campaigns');
+  const cid = sessionStorage.getItem('dashc') || '';
+  const d = await api('/dashboard' + (cid ? '?campaign_id=' + cid : ''));
+  const L = d.leads, C = d.campanhas, F = d.funil, mx = Math.max(1, ...d.serie.map(s => Math.max(s.enviadas, s.recebidas)));
+  const tile = (n, l) => `<div class="card tile"><div class="n">${n}</div><div class="l">${l}</div></div>`;
+  const steps = [['Leads', F.leads], ['Contatados', F.contatados], ['Responderam', F.responderam], ['Interessados', F.interessados], ['Qualificados', F.qualificados], ['Transferidos p/ SDR', F.sdr], ['Oportunidades', F.oportunidades], ['Conversões', F.conversoes]];
+  m.innerHTML = `<div class="row"><h1 class="sp">Dashboard</h1>${cs.length ? `<select id="cf" style="width:auto"><option value="">Todas as campanhas</option>${cs.map(c => `<option value="${c.id}" ${cid==c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select>` : ''}</div>
+  <h2>Leads</h2><div class="grid g4">${tile(L.total,'Total')}${tile(L.novos,'Novos')}${tile(L.contatados,'Contatados')}${tile(L.responderam,'Responderam')}${tile(L.interessados,'Interessados')}${tile(L.qualificados,'Qualificados')}${tile(L.sem_interesse,'Sem interesse')}${tile(L.opt_out,'Opt-out')}</div>
+  <h2>Campanhas</h2><div class="grid g4">${tile(C.mensagens_enviadas,'Mensagens enviadas')}${tile(C.respostas,'Respostas')}${tile(C.taxa_resposta+'%','Taxa de resposta')}${tile(C.taxa_interesse+'%','Taxa de interesse')}${tile(C.taxa_qualificacao+'%','Taxa de qualificação')}${tile(C.leads_transferidos,'Transferidos p/ SDR')}${tile(C.conversoes,'Conversões')}${tile(C.taxa_conversao+'%','Conversão dos transferidos')}</div>
+  <div class="grid g2"><div class="card"><h2>Funil</h2><div class="funnel">${steps.map(([l,n]) => `<div><div class="lab">${l} — <b>${n}</b></div><div class="bar" style="width:${Math.max(3, 100*n/Math.max(1,F.leads))}%"></div></div>`).join('')}</div></div>
+  <div class="card"><h2>Últimos 14 dias</h2><div class="chart">${d.serie.map(s => `<div class="col" title="${s.dia}: ${s.enviadas} enviadas / ${s.recebidas} recebidas"><i style="height:${100*s.recebidas/mx}%;background:var(--warn)"></i><i style="height:${100*s.enviadas/mx}%;background:var(--pri)"></i></div>`).join('')}</div>
+  <p class="small mut"><span style="color:var(--pri)">■</span> enviadas &nbsp; <span style="color:var(--warn)">■</span> recebidas</p>
+  <h3>Fila de envio</h3><p class="small">${Object.entries(d.fila).map(([k,v]) => `${esc(k)}: <b>${v}</b>`).join(' · ') || 'vazia'}</p></div></div>`;
+  const cf = $('#cf'); if (cf) cf.onchange = () => { try { sessionStorage.setItem('dashc', cf.value); } catch (e) {} render(); };
+}
+
+/* ---------------- importação ---------------- */
+async function importar(m) {
+  const cs = await api('/campaigns');
+  m.innerHTML = `<h1>Importar leads (CSV / XLSX)</h1><div class="card"><input type="file" id="file" accept=".csv,.xlsx"><p class="small mut">Colunas são detectadas automaticamente; telefones são normalizados para +55…, duplicados e números na lista de supressão são ignorados.</p></div><div id="step2"></div>`;
+  $('#file').onchange = async ev => {
+    const f = ev.target.files[0]; if (!f) return; const fd = new FormData(); fd.append('file', f);
+    const p = await act(() => api('/imports/preview', {body: fd})); if (!p) return;
+    const inv = {}; for (const [h, t] of Object.entries(p.mapping)) inv[h] = t;
+    const opts = h => `<option value="">— ignorar —</option>` + p.targets.map(t => `<option value="${t}" ${inv[h]===t?'selected':''}>${t}</option>`).join('') + `<option value="custom:${esc(h)}" ${(inv[h]||'').startsWith('custom:')?'selected':''}>campo personalizado: ${esc(h)}</option>`;
+    $('#step2').innerHTML = `<div class="card"><h2>1. Mapeamento de colunas <span class="mut small">(${p.total_rows} linhas)</span></h2>
+      <table><tr><th>Coluna do arquivo</th><th>Exemplo</th><th>Campo / variável</th></tr>${p.headers.map(h => `<tr><td>${esc(h)}</td><td class="mut">${esc(p.sample[0]?.[h])}</td><td><select data-h="${esc(h)}" class="mp">${opts(h)}</select></td></tr>`).join('')}</table>
+      <p class="small">Telefones: <span class="badge b-ok">${p.phone_stats.ok||0} ok</span> <span class="badge b-warn">${p.phone_stats.corrigido||0} corrigidos</span> <span class="badge b-err">${p.phone_stats.invalido||0} inválidos</span></p></div>
+      <div class="card"><h2>2. Origem e consentimento (LGPD / Meta)</h2>
+      <div class="grid g2"><div><label>Origem dos dados (parceiro/rede/lista)</label><input id="origin" placeholder="Ex.: Rede X — lista de associados 2026"></div>
+      <div><label>Base legal</label><select id="legal"><option value="legitimo_interesse">Legítimo interesse (B2B)</option><option value="consentimento">Consentimento</option><option value="execucao_contrato">Execução de contrato</option></select></div>
+      <div><label>Opt-in para WhatsApp</label><select id="optin"><option value="unknown">Não comprovado (sem opt-in)</option><option value="opt_in">Opt-in comprovado</option></select></div>
+      <div><label>Evidência do opt-in (obrigatória se comprovado)</label><input id="evid" placeholder="Ex.: formulário de cadastro com aceite de WhatsApp, 03/2026"></div></div>
+      <div class="alert a-warn small">A Meta exige opt-in para mensagens iniciadas pela empresa. Campanhas exigem opt-in por padrão; sem ele, leads ficam bloqueados para envio ativo.</div></div>
+      <div class="card"><h2>3. Adicionar a uma campanha (opcional)</h2><select id="camp"><option value="">— só importar —</option>${cs.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select>
+      <p><button class="pri" id="go">Importar</button></p><div id="res"></div></div>`;
+    $('#go').onclick = async () => {
+      const mapping = {}; document.querySelectorAll('.mp').forEach(s => { if (s.value) mapping[s.dataset.h] = s.value; });
+      const r = await act(() => api(`/imports/${p.import_id}/commit`, {body: {mapping, source_origin: $('#origin').value, legal_basis: $('#legal').value, opt_in_status: $('#optin').value, opt_in_evidence: $('#evid').value, campaign_id: $('#camp').value || null}}));
+      if (!r) return;
+      $('#res').innerHTML = `<div class="alert a-ok"><b>Importação concluída.</b> Criados: ${r.criados} · já existentes: ${r.existentes} · duplicados no arquivo: ${r.duplicados_arquivo} · bloqueados por opt-out: ${r.suprimidos_opt_out} · telefones corrigidos: ${r.corrigidos} · inválidos: ${r.invalidos.length}${r.campanha ? '<br>Campanha: ' + esc(JSON.stringify(r.campanha)) : ''}</div>
+        ${r.invalidos.length ? `<table><tr><th>Linha</th><th>Valor</th><th>Motivo</th></tr>${r.invalidos.map(i => `<tr><td>${i.linha}</td><td>${esc(i.valor)}</td><td>${esc(i.motivo)}</td></tr>`).join('')}</table>` : ''}`;
+    };
+  };
+}
+
+/* ---------------- campanhas ---------------- */
+async function campanhas(m, r) {
+  if (r.id === 'nova') return campForm(m);
+  if (r.id) return campDetail(m, +r.id, r.tab || 'visao');
+  const cs = await api('/campaigns');
+  m.innerHTML = `<div class="row"><h1 class="sp">Campanhas</h1><a href="#/campanhas/nova"><button class="pri">+ Nova campanha</button></a></div>
+  <div class="card"><table><tr><th>Nome</th><th>Status</th><th>Leads</th><th>Enviadas</th><th>Respostas</th><th>Tx. resposta</th><th>Transferidos</th></tr>
+  ${cs.map(c => `<tr class="click" onclick="location.hash='#/campanhas/${c.id}'"><td><b>${esc(c.name)}</b><div class="small mut">${esc(c.objective)}</div></td><td>${stBadge(c.status)}</td><td>${c.leads}</td><td>${c.mensagens_enviadas}</td><td>${c.respostas}</td><td>${c.taxa_resposta}%</td><td>${c.leads_transferidos}</td></tr>`).join('') || '<tr><td colspan=7 class="mut">Nenhuma campanha ainda.</td></tr>'}</table></div>`;
+}
+
+async function campForm(m) {
+  const wa = await api('/whatsapp-accounts');
+  m.innerHTML = `<h1>Nova campanha</h1><div class="card"><form id="f"><label>Nome</label><input name="name" required placeholder="Farmácias — redes regionais"><label>Objetivo</label><input name="objective" placeholder="Qualificar farmácias para avaliar o ERP">
+  <label>Conta WhatsApp</label><select name="whatsapp_account_id">${wa.map(a => `<option value="${a.id}">${esc(a.name)} (${a.provider})</option>`).join('')}</select>
+  <p class="small mut">Mensagens, cadência, persona, qualificação e regras vêm com padrões e são ajustados na tela da campanha.</p><button class="pri">Criar</button></form></div>`;
+  $('#f').onsubmit = async ev => { ev.preventDefault(); const d = Object.fromEntries(new FormData(ev.target)); const r = await act(() => api('/campaigns', {body: d})); if (r) location.hash = '#/campanhas/' + r.id; };
+}
+
+const DAYS = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+const INTERVALS = [[300,'5 minutos'],[600,'10 minutos'],[1800,'30 minutos'],[3600,'1 hora'],[7200,'2 horas'],[14400,'4 horas'],[86400,'24 horas']];
+const DELAYS = [[0,'Imediato'],[1800,'30 min'],[14400,'4 h'],[86400,'1 dia'],[259200,'3 dias'],[604800,'7 dias']];
+
+async function campDetail(m, id, tab) {
+  const c = await api('/campaigns/' + id);
+  const tabs = [['visao','Visão geral'],['mensagens','Mensagens'],['cadencia','Cadência'],['ia','IA e qualificação'],['regras','Regras'],['simulacao','Simulação'],['fila','Fila'],['leads','Leads']];
+  m.innerHTML = `<div class="row"><h1 class="sp">${esc(c.name)} ${stBadge(c.status)}</h1>
+    ${c.status==='active' ? `<button id="pause">⏸ Pausar</button>` : ''}${c.status==='paused' ? `<button class="pri" id="resume">▶ Retomar</button>` : ''}
+    ${['draft','ready'].includes(c.status) ? `<button class="pri" id="activate">🚀 Ativar</button>` : ''}${c.status!=='finished' ? `<button class="dng" id="finish">Encerrar</button>` : ''}</div>
+  <div class="tabs">${tabs.map(([k,l]) => `<a href="#/campanhas/${id}/${k}" class="${tab===k?'on':''}">${l}</a>`).join('')}</div><div id="tab"></div>`;
+  const doAct = (a, msg) => async () => { if (await act(() => api(`/campaigns/${id}/${a}`, {method:'POST'}), msg) !== undefined) render(); };
+  for (const [i, a, msg] of [['pause','pause','Campanha pausada'],['resume','resume','Campanha retomada'],['activate','activate','Campanha ativada — a cadência foi agendada'],['finish','finish','Campanha encerrada']]) { const b = $('#' + i); if (b) b.onclick = doAct(a, msg); }
+  const T = $('#tab'); const lock = c.status === 'active' ? '<div class="alert a-warn">Campanha ativa: pause para editar.</div>' : '';
+  const save = async (patch) => { const r = await act(() => api('/campaigns/' + id, {method:'PUT', body: patch}), 'Salvo'); if (r) render(); };
+
+  if (tab === 'visao') {
+    const rd = await api(`/campaigns/${id}/readiness`); const dsh = await api('/dashboard?campaign_id=' + id);
+    T.innerHTML = `${rd.problems.length ? `<div class="alert a-err"><b>Pendências para ativar:</b><ul>${rd.problems.map(p => `<li>${esc(p)}</li>`).join('')}</ul></div>` : '<div class="alert a-ok">Pronta para ativar.</div>'}${rd.warnings.map(w => `<div class="alert a-warn">${esc(w)}</div>`).join('')}
+    <div class="grid g4"><div class="card tile"><div class="n">${dsh.leads.total}</div><div class="l">Leads</div></div><div class="card tile"><div class="n">${dsh.campanhas.mensagens_enviadas}</div><div class="l">Enviadas</div></div><div class="card tile"><div class="n">${dsh.campanhas.taxa_resposta}%</div><div class="l">Resposta</div></div><div class="card tile"><div class="n">${dsh.campanhas.leads_transferidos}</div><div class="l">Transferidos</div></div></div>
+    <div class="card"><h2>Dados</h2><label>Nome</label><input id="n" value="${esc(c.name)}"><label>Objetivo</label><input id="o" value="${esc(c.objective)}">
+    <label>Cooldown entre campanhas (dias)</label><input id="cd" type="number" value="${c.cooldown_days}"><label>Variáveis extras (uma por linha: chave=valor, ex.: problema=gestão de estoque)</label>
+    <textarea id="vars">${esc(Object.entries(c.variables||{}).map(([k,v]) => k+'='+v).join('\n'))}</textarea>
+    <p><button class="pri" id="sv">Salvar</button></p>${lock}</div>`;
+    $('#sv').onclick = () => save({name: $('#n').value, objective: $('#o').value, cooldown_days: +$('#cd').value, variables: Object.fromEntries(split($('#vars').value).filter(l => l.includes('=')).map(l => [l.slice(0, l.indexOf('=')).trim(), l.slice(l.indexOf('=') + 1).trim()]))});
+  }
+  if (tab === 'mensagens') {
+    T.innerHTML = `${lock}<div class="alert a-warn small">Variáveis: <code>{{nome}} {{primeiro_nome}} {{empresa}} {{cidade}} {{segmento}} {{cargo}} {{observacao}} {{agente}} {{minha_empresa}}</code> e campos personalizados. Use <code>{{var|padrão}}</code> para valor padrão. Com WhatsApp oficial, mensagens fora da janela de 24h precisam de <b>template aprovado pela Meta</b>: informe o nome do template e marque como aprovado.</div>
+    <div id="steps">${c.steps.map((s, i) => `<div class="card step"><div class="row"><b class="sp">${i === 0 ? 'Mensagem inicial' : s.kind === 'closing' ? 'Encerramento' : 'Follow-up ' + i}</b>
+      ${i ? `<select class="dl" style="width:auto">${DELAYS.concat(DELAYS.some(d => d[0]===s.delay_seconds) ? [] : [[s.delay_seconds, Math.round(s.delay_seconds/60)+' min']]).map(([v,l]) => `<option value="${v}" ${v===s.delay_seconds?'selected':''}>${l} após o anterior</option>`).join('')}</select><button class="dng rm">remover</button>` : ''}</div>
+      <input type="hidden" class="kd" value="${s.kind}"><label>Texto</label><textarea class="bd">${esc(s.body)}</textarea>
+      <div class="row"><div class="sp"><label>Nome do template na Meta</label><input class="tn" value="${esc(s.wa_template_name || '')}"></div><div><label>Aprovação</label><select class="ap"><option value="not_submitted" ${s.approval_status==='not_submitted'?'selected':''}>não enviado</option><option value="pending" ${s.approval_status==='pending'?'selected':''}>pendente</option><option value="approved" ${s.approval_status==='approved'?'selected':''}>aprovado</option></select></div></div>
+      <details><summary class="small mut">Texto no formato Meta</summary><pre>${esc(s.meta_body)}</pre></details></div>`).join('')}</div>
+    <div class="row"><button id="add">+ Follow-up</button><button class="pri" id="sv">Salvar mensagens</button></div>`;
+    const collect = () => [...document.querySelectorAll('.step')].map((el, i) => ({kind: i === 0 ? 'initial' : $('.kd', el).value, name: i === 0 ? 'Mensagem inicial' : (i === 0 ? '' : 'Passo ' + i), body: $('.bd', el).value, delay_seconds: i ? +$('.dl', el).value : 0, wa_template_name: $('.tn', el).value, approval_status: $('.ap', el).value, language: 'pt_BR'}));
+    $('#sv').onclick = () => save({steps: collect()});
+    $('#add').onclick = () => { const s = collect(); const idx = s.findIndex(x => x.kind === 'closing'); const n = {kind:'followup', name:'Follow-up', body:'{{primeiro_nome|Olá}}, ... Para não receber mais mensagens, responda PARE.', delay_seconds:86400, language:'pt_BR'}; if (idx < 0) s.push(n); else s.splice(idx, 0, n); save({steps: s}); };
+    document.querySelectorAll('.rm').forEach((b, i) => b.onclick = () => { const s = collect(); s.splice(i + 1, 1); save({steps: s}); });
+  }
+  if (tab === 'cadencia') {
+    const k = c.cadence, w = k.window;
+    T.innerHTML = `${lock}<div class="card"><h2>Cadência de envio</h2><p class="small mut">Controle operacional de ritmo e capacidade (respeita limites da conta e da Meta). Não há aleatorização para simular comportamento humano.</p>
+    <div class="grid g2"><div><label>Intervalo entre novos contatos</label><select id="iv">${INTERVALS.map(([v,l]) => `<option value="${v}" ${v===k.interval_seconds?'selected':''}>${l}</option>`).join('')}<option value="custom" ${INTERVALS.some(i=>i[0]===k.interval_seconds)?'':'selected'}>personalizado (min):</option></select><input id="ivc" type="number" min="1" value="${Math.round(k.interval_seconds/60)}" style="margin-top:6px"></div>
+    <div><label>Máx. contatos novos por dia</label><input id="mpd" type="number" value="${k.max_contacts_per_day ?? ''}"></div>
+    <div><label>Máx. contatos novos por hora (opcional)</label><input id="mph" type="number" value="${k.max_contacts_per_hour ?? ''}"></div>
+    <div><label>Máx. mensagens por lead</label><input id="mpl" type="number" value="${k.max_messages_per_lead}"></div>
+    <div><label>Horário inicial</label><input id="ws" type="time" value="${w.start}"></div><div><label>Horário final</label><input id="we" type="time" value="${w.end}"></div></div>
+    <label>Dias permitidos</label><div class="row">${DAYS.map((d,i) => `<label style="margin:0"><input type="checkbox" class="dy" value="${i}" ${w.days.includes(i)?'checked':''} style="width:auto"> ${d}</label>`).join('')}</div>
+    <label>Fuso</label><input id="tz" value="${esc(k.timezone)}"><p><button class="pri" id="sv">Salvar cadência</button></p></div>`;
+    $('#sv').onclick = () => { const iv = $('#iv').value === 'custom' ? $('#ivc').value * 60 : +$('#iv').value; const nv = x => x === '' ? null : +x;
+      save({cadence: {timezone: $('#tz').value, interval_seconds: iv, max_contacts_per_day: nv($('#mpd').value), max_contacts_per_hour: nv($('#mph').value), max_messages_per_lead: +$('#mpl').value, window: {start: $('#ws').value, end: $('#we').value, days: [...document.querySelectorAll('.dy:checked')].map(x => +x.value)}}}); };
+  }
+  if (tab === 'ia') {
+    const p = c.persona, q = c.qualification;
+    T.innerHTML = `${lock}<div class="card"><h2>Personalidade do agente</h2><div class="grid g2"><div><label>Nome do agente</label><input id="an" value="${esc(p.agent_name)}"></div><div><label>Nome da empresa</label><input id="cn" value="${esc(p.company_name)}"></div></div>
+    <label>Tom</label><input id="tn" value="${esc(p.tone)}"><label>Objetivo</label><input id="ob" value="${esc(p.objective)}"><label>Comportamento (um por linha)</label><textarea id="bh">${esc((p.behavior||[]).join('\n'))}</textarea>
+    <label>Contexto do produto (a IA só pode afirmar o que estiver aqui)</label><textarea id="pc">${esc(p.product_context)}</textarea>
+    <div class="grid g2"><div><label>Mensagem de handoff</label><textarea id="hm">${esc(p.handoff_message)}</textarea></div><div><label>Confirmação de opt-out</label><textarea id="om">${esc(p.optout_ack_message)}</textarea></div></div><label>Mensagem de encerramento</label><input id="cm" value="${esc(p.closing_message)}"></div>
+    <div class="card"><h2>Perguntas de qualificação</h2><p class="small mut">Formato <code>chave | pergunta</code>, uma por linha. A IA registra as respostas estruturadas por chave.</p><textarea id="qs" style="min-height:130px">${esc(q.questions.map(x => x.key + ' | ' + x.question).join('\n'))}</textarea>
+    <label>Chaves obrigatórias para qualificar (separadas por vírgula)</label><input id="rq" value="${esc(q.required_keys.join(', '))}"><label>Máx. turnos da IA antes de transferir</label><input id="mt" type="number" value="${q.max_ai_turns}">
+    <p><button class="pri" id="sv">Salvar</button></p></div>`;
+    $('#sv').onclick = () => save({persona: {agent_name: $('#an').value, company_name: $('#cn').value, tone: $('#tn').value, objective: $('#ob').value, behavior: split($('#bh').value), product_context: $('#pc').value, handoff_message: $('#hm').value, optout_ack_message: $('#om').value, closing_message: $('#cm').value},
+      qualification: {questions: split($('#qs').value).map(l => { const [k, ...r] = l.split('|'); return {key: k.trim(), question: r.join('|').trim()}; }).filter(x => x.key && x.question), required_keys: $('#rq').value.split(',').map(x => x.trim()).filter(Boolean), max_ai_turns: +$('#mt').value}});
+  }
+  if (tab === 'regras') {
+    T.innerHTML = `${lock}<div class="card"><h2>Motor de regras</h2><p class="small mut">A IA classifica; as regras decidem. Menor prioridade executa primeiro; a primeira que casar vence. <b>Opt-out sempre bloqueia o contato</b> (regra fixa, não editável). Ações: <code>handoff, close, send_closing, block_contact, pause_followups, set_status:CODIGO, continue_ai</code>.</p>
+    <textarea id="rj" style="min-height:360px;font-family:ui-monospace,monospace;font-size:12px">${esc(JSON.stringify(c.rules.map(({name, priority, enabled, condition, actions}) => ({name, priority, enabled, condition, actions})), null, 2))}</textarea><p><button class="pri" id="sv">Salvar regras</button></p></div>`;
+    $('#sv').onclick = async () => { let v; try { v = JSON.parse($('#rj').value); } catch (e) { return notify('JSON inválido: ' + e.message, 'err'); } if (await act(() => api(`/campaigns/${id}/rules`, {method:'PUT', body: v}), 'Regras salvas') !== undefined) render(); };
+  }
+  if (tab === 'simulacao') {
+    const sc = await api('/simulation/scenarios'); const sim = c.simulation;
+    T.innerHTML = `<div class="card"><h2>Simulação antes de ativar</h2><p class="small mut">Nenhuma mensagem real é enviada. Roda a mensagem inicial → resposta simulada → IA → follow-up → qualificação → handoff, com a configuração atual da campanha.</p>
+    <div class="row"><label style="margin:0">Leads simulados</label><input id="sn" type="number" min="1" max="10" value="5" style="width:80px"><button class="pri" id="run">▶ Rodar simulação</button>
+    ${sim && !c.simulation_stale ? (c.simulation_approved ? '<span class="badge b-ok">Aprovada</span>' : '<button id="ap" class="pri">✔ Aprovar para ativação</button>') : ''}</div>
+    <details style="margin-top:10px"><summary class="small">Resposta personalizada (opcional): digite as respostas do lead, uma por linha</summary><textarea id="cust" placeholder="Oi, pode explicar?\nTenho 3 lojas\nSou o dono"></textarea></details>
+    ${c.simulation_stale ? '<div class="alert a-warn">A configuração mudou desde a última simulação. Rode novamente.</div>' : ''}</div><div id="simout"></div>`;
+    const show = s => { if (!s) return; $('#simout').innerHTML = (s.aviso ? `<div class="alert a-warn">${esc(s.aviso)}</div>` : '') + s.execucoes.map(e => `<div class="card"><div class="row"><b class="sp">${esc(e.lead.nome)} — ${esc(e.lead.empresa)}</b><span class="badge b-gray">${esc(e.cenario_nome)}</span>${stBadge(e.status_final)}</div><div class="tl" style="margin-top:10px">
+      ${e.eventos.map(v => `<div class="ev ${v.de==='lead'?'lead':v.tipo}"><div class="small mut">${esc(v.tipo.replace(/_/g,' '))}${v.de ? ' · ' + esc(v.de) : ''}</div><div style="white-space:pre-wrap">${esc(v.texto || '')}</div>${v.motivo ? `<div class="small"><b>Motivo:</b> ${esc(v.motivo)} <span class="mut">(regra: ${esc(v.regra||'')})</span></div>` : ''}${v.qualificacao && Object.keys(v.qualificacao).length ? `<pre>${esc(JSON.stringify(v.qualificacao, null, 1))}</pre>` : ''}</div>`).join('')}</div></div>`).join(''); };
+    show(sim);
+    $('#run').onclick = async () => { const cu = split($('#cust').value); const s = await act(() => api(`/campaigns/${id}/simulate`, {body: {n: +$('#sn').value, custom: cu.length ? cu : undefined}})); if (s) { notify('Simulação concluída'); const c2 = await api('/campaigns/' + id); campDetail(m, id, 'simulacao'); } };
+    const ap = $('#ap'); if (ap) ap.onclick = async () => { if (await act(() => api(`/campaigns/${id}/simulation/approve`, {method:'POST'}), 'Simulação aprovada') !== undefined) render(); };
+  }
+  if (tab === 'fila') {
+    const f = await api(`/campaigns/${id}/queue`);
+    T.innerHTML = `<div class="card"><h2>Fila de envio</h2><p class="small">${Object.entries(f.resumo).map(([k,v]) => `${esc(k)}: <b>${v}</b>`).join(' · ') || 'vazia'}</p><table><tr><th>Quando</th><th>Tipo</th><th>Lead</th><th>Status</th><th>Tentativas</th><th>Erro</th></tr>
+    ${f.proximos.map(j => `<tr><td>${fmt(j.run_at)}</td><td>${esc(j.type)}</td><td>${esc(j.name)} <span class="mut small">${esc(j.phone_e164)}</span></td><td>${esc(j.status)}</td><td>${j.attempts}</td><td class="small">${esc(j.last_error||'')}</td></tr>`).join('') || '<tr><td colspan=6 class="mut">Nada agendado.</td></tr>'}</table></div>`;
+  }
+  if (tab === 'leads') {
+    const ls = await api(`/campaigns/${id}/leads`);
+    T.innerHTML = `<div class="card"><div class="row"><h2 class="sp">Leads (${ls.length})</h2><button id="addall">Adicionar todos os leads elegíveis</button></div><table><tr><th>Nome</th><th>Empresa</th><th>Telefone</th><th>Status</th><th>Msgs</th><th>Prio.</th><th></th></tr>
+    ${ls.map(l => `<tr><td>${esc(l.name)}</td><td>${esc(l.company)}</td><td class="small">${esc(l.phone_e164)}</td><td>${stBadge(l.status)}</td><td>${l.messages_sent}</td><td>${l.priority}</td><td><button class="talk" data-i="${l.id}">Conversar</button></td></tr>`).join('')}</table></div>`;
+    document.querySelectorAll('.talk').forEach(b => b.onclick = async () => { const r = await act(() => api(`/campaign-leads/${b.dataset.i}/conversation`, {method:'POST'})); if (r) location.hash = '#/conversas/' + r.conversation_id; });
+    $('#addall').onclick = async () => { const r = await act(() => api(`/campaigns/${id}/leads`, {body:{filter:'all_unassigned'}})); if (r) { notify(JSON.stringify(r)); render(); } };
+  }
+}
+
+/* ---------------- conversas ---------------- */
+async function conversas(m, r) {
+  const list = await api('/conversations'); const sel = r.id ? +r.id : null;
+  m.innerHTML = `<h1>Conversas</h1><div class="split"><div class="card" style="padding:0;max-height:75vh;overflow:auto">${list.map(c => `<div class="item ${c.id===sel?'on':''}" onclick="location.hash='#/conversas/${c.id}'"><div class="row"><b class="sp">${esc(c.name || c.phone_e164)}</b>${stBadge(c.lead_status)}</div><div class="small mut">${esc(c.company||'')} · ${esc(c.campaign)}</div><div class="small" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${esc(c.last_body||'')}</div></div>`).join('') || '<div class="item mut">Nenhuma conversa ainda.</div>'}</div><div id="thread" class="card">Selecione uma conversa.</div></div>`;
+  if (!sel) return;
+  const draw = async (keepDraft) => {
+    const d = await api('/conversations/' + sel); const cv = d.conversation, q = d.qualification, o = d.opportunity;
+    const human = cv.status === 'handoff', blocked = ['OPT_OUT','BLOQUEADO','INVALIDO'].includes(d.campaign_lead.status);
+    const draft = keepDraft && $('#txt') ? $('#txt').value : '';
+    const off = d.provider === 'qr' && d.account_status !== 'connected';
+    $('#thread').innerHTML = `<div class="row"><h2 class="sp">${esc(d.lead.name || d.lead.phone_e164)} <span class="mut small">${esc(d.lead.company||'')} · ${esc(d.lead.phone_e164)}</span></h2>${stBadge(d.campaign_lead.status)}</div>
+    ${off ? `<div class="alert a-warn">WhatsApp não conectado. <a href="#/config">Conectar por QR Code</a> para enviar e receber.</div>` : ''}
+    ${blocked ? '<div class="alert a-warn">Contato bloqueado (opt-out ou número inválido). Nenhuma mensagem será enviada.</div>' : `<div class="row" style="margin:8px 0"><span class="small mut">Quem conduz esta conversa:</span>
+      <button id="m-ai" class="${human ? '' : 'pri'}" aria-pressed="${!human}">🤖 IA conduz sozinha</button><button id="m-hu" class="${human ? 'pri' : ''}" aria-pressed="${human}">✍️ Eu participo</button></div>
+      <p class="small mut">${human ? 'A IA está pausada nesta conversa e não envia nada. Você escreve; a IA só sugere se você pedir.' : 'A IA responde sozinha às mensagens do lead, seguindo as regras da campanha. Você pode assumir a qualquer momento.'}</p>`}
+    ${o ? `<div class="alert a-ok"><b>Oportunidade #${o.id}</b> (${esc(o.status)}) — <b>Motivo:</b> ${esc(o.summary.motivo || o.summary.reason || JSON.stringify(o.summary))}</div>` : ''}
+    ${q && Object.keys(q.data).length ? `<details><summary class="small"><b>Qualificação</b> — interesse: ${esc(q.interest_level||'—')}</summary><pre>${esc(JSON.stringify(q.data, null, 1))}</pre></details>` : ''}
+    <div class="chat" id="chat">${d.messages.map(x => `<div class="msg ${x.direction==='in'?'in':'out'}">${esc(x.body)}<div class="meta">${x.direction==='in' ? 'lead' : x.sender==='ai' ? '🤖 IA' : x.sender==='sdr' ? '✍️ você' : esc(x.sender)} · ${fmt(x.created_at)}${x.analysis && x.analysis.intent ? ` · intenção: ${esc(x.analysis.intent)}, interesse: ${esc(x.analysis.interest_level||'')}` : ''}</div></div>`).join('') || '<div class="mut small" style="padding:12px">Nenhuma mensagem ainda.</div>'}</div>
+    ${blocked ? '' : `<div class="row" style="margin-top:12px;align-items:flex-end"><textarea id="txt" class="sp" style="min-height:60px" placeholder="${human ? 'Escreva a mensagem… (Ctrl+Enter envia)' : 'Mude para “Eu participo” para escrever'}" ${human ? '' : 'disabled'}></textarea><div style="display:grid;gap:6px"><button class="pri" id="snd" ${human ? '' : 'disabled'}>Enviar</button><button id="sug" ${human ? '' : 'disabled'}>💡 Sugerir</button></div></div>`}
+    ${d.provider === 'qr' ? '' : `<p class="small mut">Janela de 24h do WhatsApp até: ${fmt(cv.window_expires_at)}</p>`}
+    ${d.provider === 'mock' ? `<details><summary class="small">🧪 Simular resposta do lead (conta de teste)</summary><div class="row"><input id="sim" class="sp" placeholder="Ex.: Tenho interesse, pode explicar?"><button id="simb">Enviar como lead</button></div></details>` : ''}`;
+    const ch = $('#chat'); ch.scrollTop = ch.scrollHeight; if ($('#txt') && draft) $('#txt').value = draft;
+    window._n = d.messages.length + ':' + cv.status;
+    const mode = async m => { if (await act(() => api(`/conversations/${sel}/mode`, {body:{mode: m}}), m === 'ai' ? 'A IA conduz esta conversa' : 'Você assumiu a conversa') !== undefined) draw(false); };
+    if ($('#m-ai')) { $('#m-ai').onclick = () => { if (human) mode('ai'); }; $('#m-hu').onclick = () => { if (!human) mode('human'); }; }
+    const send = async () => { const t = $('#txt').value.trim(); if (!t) return; $('#snd').disabled = true; if (await act(() => api(`/conversations/${sel}/reply`, {body:{text:t}})) !== undefined) draw(false); else $('#snd').disabled = false; };
+    if ($('#snd')) { $('#snd').onclick = send; $('#txt').onkeydown = e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send(); } }; }
+    if ($('#sug')) $('#sug').onclick = async () => { $('#sug').disabled = true; $('#sug').textContent = 'Pensando…'; const r = await act(() => api(`/conversations/${sel}/suggest`, {method:'POST'})); $('#sug').disabled = false; $('#sug').textContent = '💡 Sugerir'; if (r && r.text) { $('#txt').value = r.text; $('#txt').focus(); notify(`Rascunho da IA (intenção: ${r.intent}). Edite e envie.`); } else if (r) notify('A IA não sugeriu texto para este caso (ex.: opt-out).', 'err'); };
+    const sb = $('#simb'); if (sb) sb.onclick = async () => { const t = $('#sim').value.trim(); if (!t) return; await act(() => api('/dev/inbound', {body:{conversation_id: sel, text: t}})); notify('Mensagem recebida; a IA responde em instantes…'); };
+  };
+  await draw(false);
+  window._poll = setInterval(async () => { try { const d = await api('/conversations/' + sel); if (window._n !== d.messages.length + ':' + d.conversation.status) draw(true); } catch (e) {} }, 5000);
+}
+
+/* ---------------- oportunidades ---------------- */
+async function oportunidades(m) {
+  const os = await api('/opportunities');
+  m.innerHTML = `<h1>Oportunidades (handoff)</h1><div class="card"><table><tr><th>Lead</th><th>Campanha</th><th>SDR</th><th>Motivo da qualificação</th><th>Status</th><th></th></tr>
+  ${os.map(o => `<tr><td><b>${esc(o.name)}</b><div class="small mut">${esc(o.company||'')} · ${esc(o.phone_e164)}</div></td><td>${esc(o.campaign)}</td><td>${esc(o.sdr||'—')}</td><td class="small">${esc(o.summary.motivo || o.summary.reason || '')}</td>
+  <td><select data-o="${o.id}" class="os">${['novo','em_andamento','ganha','perdida'].map(s => `<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select></td><td><a href="#/conversas">abrir</a></td></tr>`).join('') || '<tr><td colspan=6 class="mut">Nenhuma oportunidade ainda.</td></tr>'}</table></div>`;
+  document.querySelectorAll('.os').forEach(s => s.onchange = () => act(() => api('/opportunities/' + s.dataset.o, {method:'PATCH', body:{status: s.value}}), 'Atualizado'));
+}
+
+/* ---------------- supressão ---------------- */
+async function supressao(m) {
+  const os = await api('/opt-outs');
+  m.innerHTML = `<h1>Lista de supressão (opt-out global)</h1><div class="card"><p class="small mut">Números aqui nunca recebem mensagens em nenhuma campanha. Só guardamos hash + versão mascarada do número.</p><label>Adicionar números (um por linha)</label><textarea id="ph"></textarea><p><button class="pri" id="add">Adicionar à supressão</button></p></div>
+  <div class="card"><table><tr><th>Número</th><th>Motivo</th><th>Origem</th><th>Quando</th></tr>${os.map(o => `<tr><td>${esc(o.phone_masked)}</td><td>${esc(o.reason)}</td><td>${esc(o.source)}</td><td>${fmt(o.created_at)}</td></tr>`).join('') || '<tr><td colspan=4 class="mut">Vazia.</td></tr>'}</table></div>`;
+  $('#add').onclick = async () => { const r = await act(() => api('/opt-outs', {body:{phones: split($('#ph').value)}})); if (r) { notify(r.adicionados + ' adicionados'); render(); } };
+}
+
+/* ---------------- contas WhatsApp ---------------- */
+let qrTimer = null;
+async function config(m) {
+  const as = await api('/whatsapp-accounts'); const admin = USER.role === 'admin';
+  m.innerHTML = `<h1>Contas WhatsApp</h1>
+  <div class="alert a-warn"><b>Conexão por QR Code (WhatsApp Web não oficial).</b> Viola os Termos do WhatsApp para automação e pode resultar em <b>banimento permanente do número</b>, sem apelação. Use um chip dedicado (nunca o número principal da empresa), mantenha o opt-out ativo e os limites diários baixos. Se a conta cair ou for banida, as campanhas dela são <b>pausadas automaticamente</b>. A API oficial (Cloud API) continua disponível como alternativa segura.</div>
+  <div class="card"><table><tr><th>Nome</th><th>Provedor</th><th>Número</th><th>Status</th><th>Limite/dia</th><th></th></tr>${as.map(a => `<tr><td>${esc(a.name)}</td><td>${esc(a.provider)}</td><td>${esc(a.display_phone||'')}</td><td><span class="badge ${a.status==='connected'?'b-ok':a.status==='disconnected'?'b-gray':'b-err'}">${esc(a.status)}</span></td><td>${a.daily_contact_limit}</td><td>${a.provider==='qr' ? `<button data-qr="${a.id}">Conectar / ver QR</button>` : (a.has_token ? '🔒 token' : '')}</td></tr>`).join('')}</table></div>
+  <div id="qrbox"></div>
+  ${admin ? `<div class="card"><h2>Adicionar conta</h2><div class="grid g2"><div><label>Nome</label><input id="an"></div><div><label>Provedor</label><select id="pv"><option value="qr">qr (WhatsApp Web / QR Code — não oficial)</option><option value="cloud">cloud (Meta Cloud API — oficial)</option><option value="mock">mock (teste)</option></select></div>
+  <div class="cl-only"><label>Phone Number ID</label><input id="pid"></div><div class="cl-only"><label>WABA ID</label><input id="wid"></div><div><label>Número exibido</label><input id="dp"></div><div><label>Limite diário de novos contatos</label><input id="dl" type="number" placeholder="QR: 50 por padrão"></div></div>
+  <div class="cl-only"><label>Access token (Cloud API) — armazenado criptografado</label><input id="tk" type="password" autocomplete="off"></div>
+  <p><label style="display:flex;gap:8px;align-items:flex-start;color:var(--ink)"><input type="checkbox" id="ack" style="width:auto;margin-top:3px"> Entendo que a conexão por QR Code não é oficial e pode causar o banimento do número.</label></p>
+  <p><button class="pri" id="sv">Salvar conta</button></p></div>` : ''}`;
+  const sync = () => { const pv = $('#pv'); if (!pv) return; document.querySelectorAll('.cl-only').forEach(e => e.style.display = pv.value === 'cloud' ? '' : 'none'); $('#ack').closest('p').style.display = pv.value === 'qr' ? '' : 'none'; };
+  const pv = $('#pv'); if (pv) { pv.onchange = sync; sync(); }
+  const sv = $('#sv'); if (sv) sv.onclick = async () => {
+    if ($('#pv').value === 'qr' && !$('#ack').checked) return notify('Confirme que entende o risco do QR Code.', 'err');
+    const dl = $('#dl').value; const body = {name: $('#an').value, provider: $('#pv').value, display_phone: $('#dp').value}; if (dl) body.daily_contact_limit = +dl;
+    if ($('#pv').value === 'cloud') Object.assign(body, {phone_number_id: $('#pid').value, waba_id: $('#wid').value, access_token: $('#tk').value});
+    if (await act(() => api('/whatsapp-accounts', {body}), 'Conta criada')) render(); };
+  clearInterval(qrTimer);
+  m.querySelectorAll('button[data-qr]').forEach(b => b.onclick = () => qrPanel(+b.dataset.qr, admin));
+}
+async function qrPanel(id, admin) {
+  const box = $('#qrbox'); clearInterval(qrTimer);
+  box.innerHTML = `<div class="card"><h2>Conexão por QR Code</h2><div id="qrs">Consultando…</div><div class="row" style="margin-top:10px">${admin ? '<button class="pri" id="qs">Gerar QR / reconectar</button><button class="dng" id="ql">Desconectar</button>' : ''}</div>
+  <p class="small mut">No celular: WhatsApp → Aparelhos conectados → Conectar um aparelho → aponte para o QR. O QR expira em ~1 minuto e é renovado sozinho.</p></div>`;
+  const show = r => { const st = {open: 'Conectado ✅', qr: 'Aguardando leitura do QR', connecting: 'Conectando…', not_started: 'Sessão não iniciada', close: 'Desconectado (reconectando)', logged_out: 'Deslogado pelo celular', banned: 'Número banido/restrito ⛔', replaced: 'Sessão substituída', bridge_offline: 'Serviço bridge offline'}[r.state] || r.state;
+    $('#qrs').innerHTML = `<p><b>${esc(st)}</b>${r.me ? ' · ' + esc(r.me) : ''}</p>${r.qr ? `<img alt="QR Code do WhatsApp" src="${esc(r.qr)}" style="width:260px;height:260px;background:#fff;padding:8px;border-radius:8px">` : ''}${r.error ? `<p class="small mut">${esc(r.error)}</p>` : ''}`; };
+  const poll = async () => { try { show(await api(`/whatsapp-accounts/${id}/qr/status`)); } catch (e) { $('#qrs').textContent = e.message; } };
+  await poll(); qrTimer = setInterval(() => { if (!$('#qrs')) return clearInterval(qrTimer); poll(); }, 3000);
+  const qs = $('#qs'); if (qs) qs.onclick = async () => { const r = await act(() => api(`/whatsapp-accounts/${id}/qr/start`, {method: 'POST'})); if (r) show(r); };
+  const ql = $('#ql'); if (ql) ql.onclick = async () => { if (await act(() => api(`/whatsapp-accounts/${id}/qr/logout`, {method: 'POST'}), 'Desconectado') !== undefined) render(); };
+}
+
+async function auditoria(m) {
+  const a = await api('/audit-logs');
+  m.innerHTML = `<h1>Auditoria</h1><div class="card"><table><tr><th>Quando</th><th>Usuário</th><th>Ação</th><th>Entidade</th><th>Detalhe</th><th>IP</th></tr>${a.map(r => `<tr><td>${fmt(r.created_at)}</td><td>${esc(r.email||'—')}</td><td>${esc(r.action)}</td><td>${esc(r.entity||'')} ${r.entity_id||''}</td><td class="small">${esc(r.detail||'')}</td><td class="small">${esc(r.ip||'')}</td></tr>`).join('')}</table></div>`;
+}
+
+render();
+</script>
+</body>
+</html>
