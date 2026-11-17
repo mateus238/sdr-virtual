@@ -1,0 +1,40 @@
+# SDR Virtual na VPS (Hostinger ou qualquer VPS com Docker). HTTPS automático via Caddy.
+services:
+  app:
+    build: ../..
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      DATA_DIR: /data
+      PORT: "8080"
+      SECRET_KEY: ${SECRET_KEY}
+      QR_BRIDGE_TOKEN: ${QR_BRIDGE_TOKEN}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      TIMEZONE: ${TIMEZONE:-America/Sao_Paulo}
+    volumes:
+      - dados:/data          # banco, uploads e sessão do WhatsApp (sobrevive a reinícios e atualizações)
+    expose:
+      - "8080"               # só o Caddy enxerga; não fica aberto na internet
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8080/health',timeout=4)"]
+      interval: 30s
+      timeout: 6s
+      retries: 3
+      start_period: 40s
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on: [app]
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+volumes:
+  dados:
+  caddy_data:

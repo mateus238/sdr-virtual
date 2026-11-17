@@ -44,6 +44,10 @@ No painel: **Contas WhatsApp → Adicionar conta → provedor `qr`** (confirme o
 ## Conversas: IA ou eu
 Em **Conversas** cada conversa tem o botão **🤖 IA conduz sozinha / ✍️ Eu participo**. No modo IA, ela responde às mensagens do lead seguindo as regras da campanha. No modo "Eu participo" a IA fica pausada, você escreve (Ctrl+Enter envia) e pode pedir **💡 Sugerir** um rascunho. Em **Campanhas → Leads → Conversar** você abre a conversa com qualquer lead, mesmo antes de ele responder. Contatos com opt-out ficam bloqueados nos dois modos.
 
+## Hospedagem
+- **VPS (Hostinger ou outra com Docker): recomendado.** Veja `COMO_COLOCAR_NO_AR_HOSTINGER.md` (`deploy/hostinger/`, HTTPS automático, disco permanente).
+- Render: `COMO_COLOCAR_NO_AR.md` (exige plano pago para o disco).
+
 ## Testes
 ```bash
 python -m pytest tests -q     # 27 testes: regras, cadência, importação, opt-out, follow-ups, handoff, simulação, idempotência
